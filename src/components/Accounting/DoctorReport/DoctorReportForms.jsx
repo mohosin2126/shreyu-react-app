@@ -13,7 +13,7 @@ const DoctorReportForms = () => {
         showPayment: false,
     });
     const [tableData, setTableData] = useState([]);
-    const tableRef = useRef(null); // Define table reference
+    const tableRef = useRef(null);
 
     const options = [
         { id: 1, value: "Sample", label: "Sample" },

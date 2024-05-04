@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button, ButtonGroup, Card, Col, Form,  Modal, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { Button, ButtonGroup, Card, Col, Form, Modal, Row, Alert } from "react-bootstrap";
 import PageTitle from "../../PageTitle";
 import Table from "../../Table";
 import { records as data } from "./incomedata";
@@ -15,16 +15,6 @@ const columns = [
         accessor: "category",
         sort: true,
     },
-    {
-        Header: "Action",
-        accessor: "icon",
-        Cell: ({ row }) => (
-            <div>
-                <i className="bi bi-pencil-square fs-3 p-2 text-primary"></i>
-                <i className="bi bi-trash fs-3 p-2 text-primary"></i>
-            </div>
-        ),
-    },
 ];
 
 const sizePerPageList = [
@@ -36,7 +26,42 @@ const sizePerPageList = [
 
 const IncomeCategoryTable = () => {
     const [showScrollableModal, setShowScrollableModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [validated, setValidated] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+    const [editedCategory, setEditedCategory] = useState("");
+    const [tableData, setTableData] = useState(data);
+    const [successMessage, setSuccessMessage] = useState("");
+
+    const handleEdit = (row) => {
+        setEditingItem(row);
+        setEditedCategory(row.category);
+        setShowScrollableModal(true);
+    };
+
+    const handleSave = () => {
+        const newData = tableData.map((item) => {
+            if (item.id === editingItem.id) {
+                return { ...item, category: editedCategory };
+            }
+            return item;
+        });
+        setTableData(newData);
+        setShowScrollableModal(false);
+        setSuccessMessage("Item updated successfully.");
+    };
+
+    const handleDelete = (row) => {
+        setEditingItem(row);
+        setShowDeleteModal(true); 
+    };
+
+    const confirmDelete = () => {
+        const newData = tableData.filter((item) => item.id !== editingItem.id);
+        setTableData(newData);
+        setShowDeleteModal(false); 
+        setSuccessMessage("Item deleted successfully.");
+    };
 
     const handleSubmit = (event) => {
         const form = event.currentTarget;
@@ -53,8 +78,13 @@ const IncomeCategoryTable = () => {
                 breadCrumbItems={[
                     { label: "Income Categories", path: "/components/accounting-expense-category", active: true },
                 ]}
-                title={"Incomes"}
+                title={"Income"}
             />
+            {successMessage && (
+                <Alert variant="success" onClose={() => setSuccessMessage("")} dismissible>
+                    {successMessage}
+                </Alert>
+            )}
             <Row>
                 <Col>
                     <Card>
@@ -79,38 +109,67 @@ const IncomeCategoryTable = () => {
                                         <span>Create</span>
                                     </Button>
                                     <Modal show={showScrollableModal} onHide={() => setShowScrollableModal(false)} scrollable>
-    <Modal.Header closeButton>
-        <Modal.Title as="h5">Add Income Category</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-        <Form className='addExpenseCategoryForm' noValidate validated={validated} onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="validationCategory">
-                <Form.Label>Category</Form.Label>
-                <Form.Control
-                    type="text"
-                    placeholder="Income Category Name"
-                    required
-                />
-                <Form.Control.Feedback type="invalid">
-                    Please provide an Income category name.
-                </Form.Control.Feedback>
-            </Form.Group>
-            <Button type="submit">Submit</Button>
-        </Form>
-    </Modal.Body>
-</Modal>
-
+                                        <Modal.Header closeButton>
+                                            <Modal.Title as="h5">Add Income Category</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <Form className='addExpenseCategoryForm' noValidate validated={validated} onSubmit={handleSubmit}>
+                                                <Form.Group className="mb-3" controlId="validationCategory">
+                                                    <Form.Label>Category</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Expense Category Name"
+                                                        required
+                                                        value={editedCategory}
+                                                        onChange={(e) => setEditedCategory(e.target.value)}
+                                                    />
+                                                    <Form.Control.Feedback type="invalid">
+                                                        Please provide an expense category name.
+                                                    </Form.Control.Feedback>
+                                                </Form.Group>
+                                                <Button type="submit">Submit</Button>
+                                            </Form>
+                                        </Modal.Body>
+                                    </Modal>
                                 </Col>
                             </Row>
                             <Table
-                                columns={columns}
-                                data={data}
+                                columns={[
+                                    ...columns,
+                                    {
+                                        Header: "Action",
+                                        accessor: "icon",
+                                        Cell: ({ row }) => (
+                                            <div>
+                                                <i className="bi bi-pencil-square fs-3 p-2 text-primary" onClick={() => handleEdit(row)}></i>
+                                                <i className="bi bi-trash fs-3 p-2 text-primary" onClick={() => handleDelete(row)}></i>
+                                            </div>
+                                        ),
+                                    },
+                                ]}
+                                data={tableData}
                                 pageSize={5}
                                 sizePerPageList={sizePerPageList}
                                 isSortable={true}
                                 pagination={true}
                                 isSearchable={true}
                             />
+                            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Delete Confirmation</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    Are you sure you want to delete this item?
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" onClick={confirmDelete}>
+                                        Delete
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
                         </Card.Body>
                     </Card>
                 </Col>

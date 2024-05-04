@@ -107,7 +107,7 @@ const DoctorReportForms = () => {
             const width = pdf.internal.pageSize.getWidth();
             const height = pdf.internal.pageSize.getHeight();
             pdf.addImage(imgData, "JPEG", 0, 0, width, height);
-            pdf.save("doctor_report.pdf");
+            pdf.save("contractor_report.pdf");
         });
     };
 
@@ -115,12 +115,12 @@ const DoctorReportForms = () => {
         <>
             <PageTitle
                 breadCrumbItems={[
-                    { label: "Accounting", path: "/components/accounting-report", active: true },
+                    { label: "Doctor Report", path: "/components/accounting-report", active: true },
                 ]}
-                title={"Doctor Report"}
+                title={"Accounting"}
             />
             <Card>
-                <h4 className="px-2 bg-primary text-light p-2">Doctor Report</h4>
+                <h4 className="px-2 bg-primary text-light p-2">Doctor Reports</h4>
                 <Card.Body>
                     <Row>
                         <Col>
@@ -180,8 +180,8 @@ const DoctorReportForms = () => {
             {tableData.length > 0 && (
                 <Card className="mt-3">
                     <Card.Body>
-                        <Card.Title as="h5" className="mb-4">Doctor Report</Card.Title>
-                        <Table striped bordered hover responsive="sm" variant="dark" ref={tableRef}>
+                        <Card.Title as="h5" className="mb-4">Accounting Report</Card.Title>
+                        <Table striped bordered hover responsive="sm" variant="dark">
                             <thead>
                                 <tr>
                                     <th>Date Range</th>

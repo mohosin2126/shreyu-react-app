@@ -1,23 +1,33 @@
-import { Row, Col, Card, Form, Button } from "react-bootstrap";
+import React, { useState, useRef } from "react";
+import { Row, Col, Card, Form, Button, Table } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
-import "react-bootstrap-typeahead/css/Typeahead.css";
-import { useState } from "react";
 import PageTitle from "../../PageTitle";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const AccountingReport = () => {
     const [singleSelections, setSingleSelections] = useState([]);
     const [selectedDateRange, setSelectedDateRange] = useState("");
-    const options: Array<OptionTypes> = [
+    const [showDetails, setShowDetails] = useState({
+        showGroupTests: false,
+        showExpenses: false,
+        showProfit: false,
+    });
+    const [tableData, setTableData] = useState([]);
+    const tableRef = useRef(null);
+
+    const options = [
         { id: 1, value: "Sample", label: "Sample" },
-        { id: 2, value: "drJaneSmith", label: "Dr Jane Smith" }, 
+        { id: 2, value: "drJaneSmith", label: "Dr Jane Smith" },
         { id: 3, value: "drJohnDoe", label: "Dr John Doe" },
         { id: 4, value: "drJohnDoe", label: "Dr John Doe" },
         { id: 5, value: "drJaneSmith", label: "Dr Jane Smith" },
     ];
 
-    const onChangeSingleSelection = (selected: OptionTypes[]) => {
+    const onChangeSingleSelection = (selected) => {
         setSingleSelections(selected);
     };
+
     const DaysOptions = [
         { id: 1, label: "Today" },
         { id: 2, label: "Yesterday" },
@@ -71,32 +81,59 @@ const AccountingReport = () => {
         setSelectedDateRange(`${minDate.toLocaleDateString()} - ${maxDate.toLocaleDateString()}`);
     };
 
+    const handleShowDetailsChange = (event) => {
+        setShowDetails({
+            ...showDetails,
+            [event.target.name]: event.target.checked,
+        });
+    };
+
+    const handleSave = () => {
+        const tableRow = {
+            dateRange: selectedDateRange,
+            doctor: singleSelections.length > 0 ? singleSelections[0].label : "",
+            showGroupTests: showDetails.showGroupTests,
+            showExpenses: showDetails.showExpenses,
+            showProfit: showDetails.showProfit,
+        };
+
+        setTableData([tableRow]);
+    };
+
+    const handleDownloadPDF = () => {
+        const input = tableRef.current;
+
+        html2canvas(input).then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("p", "mm", "a4");
+            const width = pdf.internal.pageSize.getWidth();
+            const height = pdf.internal.pageSize.getHeight();
+            pdf.addImage(imgData, "JPEG", 0, 0, width, height);
+            pdf.save("accounting_report.pdf");
+        });
+    };
+
     return (
         <>
             <PageTitle
                 breadCrumbItems={[
-
                     { label: "Accounting", path: "/components/accounting-report", active: true },
-
                 ]}
                 title={"Accounting Report"}
             />
-            <Card class="">
-
-                <h4 class="px-2 bg-primary text-light p-2">Accounting Report</h4>
-
+            <Card>
+                <h4 className="px-2 bg-primary text-light p-2">Accounting Report</h4>
                 <Card.Body>
                     <Row>
                         <Col>
-                            <p className="mb-1 fw-bold">Date range:
-                            </p>
+                            <p className="mb-1 fw-bold">Date range:</p>
                             <Typeahead
                                 id="select2"
-                                labelKey={"label"}
+                                labelKey="label"
                                 multiple={false}
                                 options={DaysOptions}
                                 placeholder="Choose a date range..."
-                                selected={[{ label: selectedDateRange }]} 
+                                selected={[{ label: selectedDateRange }]}
                                 onChange={(selected) => {
                                     if (selected.length > 0) {
                                         handleOptionClick(selected[0].label);
@@ -108,24 +145,23 @@ const AccountingReport = () => {
                             <p className="mb-1 fw-bold">Doctor:</p>
                             <Typeahead
                                 id="select2"
-                                labelKey={"label"}
+                                labelKey="label"
                                 multiple={false}
                                 onChange={onChangeSingleSelection}
                                 options={options}
-                                placeholder="Choose a state..."
+                                placeholder="Choose a doctor..."
                                 selected={singleSelections}
                             />
-
                         </Col>
                         <Col>
                             <p className="mb-1 fw-bold">Test:</p>
                             <Typeahead
                                 id="select2"
-                                labelKey={"label"}
+                                labelKey="label"
                                 multiple={false}
                                 onChange={onChangeSingleSelection}
                                 options={options}
-                                placeholder="Choose a state..."
+                                placeholder="Choose a test..."
                                 selected={singleSelections}
                             />
                         </Col>
@@ -133,40 +169,80 @@ const AccountingReport = () => {
                             <p className="mb-1 fw-bold">Culture:</p>
                             <Typeahead
                                 id="select2"
-                                labelKey={"label"}
+                                labelKey="label"
                                 multiple={false}
                                 onChange={onChangeSingleSelection}
                                 options={options}
-                                placeholder="Choose a state..."
+                                placeholder="Choose a culture..."
                                 selected={singleSelections}
                             />
                         </Col>
                         <Col>
-                            <p className="mb-1 fw-bold">
-                                Show Details</p>
+                            <p className="mb-1 fw-bold">Show Details:</p>
                             <Form.Check
                                 type="checkbox"
-                                id="autoSizingCheck"
+                                id="showGroupTests"
+                                name="showGroupTests"
                                 label="Show Group tests"
+                                onChange={handleShowDetailsChange}
                             />
                             <Form.Check
                                 type="checkbox"
-                                id="autoSizingCheck"
+                                id="showExpenses"
+                                name="showExpenses"
                                 label="Show Expenses"
+                                onChange={handleShowDetailsChange}
                             />
                             <Form.Check
                                 type="checkbox"
-                                id="autoSizingCheck"
+                                id="showProfit"
+                                name="showProfit"
                                 label="Show Profit"
+                                onChange={handleShowDetailsChange}
                             />
-
                         </Col>
                         <Col>
-                            <Button class="primary width-xs align-center"><i class="bi bi-gear-fill p-2"></i><span>Save</span></Button>
+                            <Button className="primary width-xs align-center" onClick={handleSave}>
+                                <i className="bi bi-gear-fill p-2"></i>
+                                <span>Save</span>
+                            </Button>
                         </Col>
                     </Row>
                 </Card.Body>
-            </Card >
+            </Card>
+            {tableData.length > 0 && (
+                <Card className="mt-3">
+                    <Card.Body>
+                        <Card.Title as="h5" className="mb-4">Accounting Report</Card.Title>
+                        <Table striped bordered hover responsive="sm" variant="dark" ref={tableRef}>
+                            <thead>
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Doctor</th>
+                                    <th>Show Group Tests</th>
+                                    <th>Show Expenses</th>
+                                    <th>Show Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tableData.map((row, index) => (
+                                    <tr key={index}>
+                                        <td>{row.dateRange}</td>
+                                        <td>{row.doctor}</td>
+                                        <td>{row.showGroupTests ? "Yes" : "No"}</td>
+                                        <td>{row.showExpenses ? "Yes" : "No"}</td>
+                                        <td>{row.showProfit ? "Yes" : "No"}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                        <Button className="primary width-xs align-center" onClick={handleDownloadPDF}>
+                            <i className="bi bi-download p-2"></i>
+                            <span>Download as PDF</span>
+                        </Button>
+                    </Card.Body>
+                </Card>
+            )}
         </>
     );
 };

@@ -1,22 +1,28 @@
-import { useState } from "react";
-import { Button, Card, Col, Form, Row } from "react-bootstrap";
+import React, { useState, useRef } from "react";
+import { Button, Card, Col, Form, Row, Table } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import PageTitle from "../../PageTitle";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
-const DoctorReportForms = () => {
+const ContractorReportForms = () => {
     const [singleSelections, setSingleSelections] = useState([]);
     const [selectedDateRange, setSelectedDateRange] = useState("");
-    const options: Array<OptionTypes> = [
+    const [showDetails, setShowDetails] = useState({
+        showGroupTests: false,
+        showPayment: false,
+    });
+    const [tableData, setTableData] = useState([]);
+    const tableRef = useRef(null); // Define table reference
+
+    const options = [
         { id: 1, value: "Sample", label: "Sample" },
-        { id: 2, value: "drJaneSmith", label: "Dr Jane Smith" }, 
+        { id: 2, value: "drJaneSmith", label: "Dr Jane Smith" },
         { id: 3, value: "drJohnDoe", label: "Dr John Doe" },
         { id: 4, value: "drJohnDoe", label: "Dr John Doe" },
         { id: 5, value: "drJaneSmith", label: "Dr Jane Smith" },
     ];
 
-    const onChangeSingleSelection = (selected: OptionTypes[]) => {
-        setSingleSelections(selected);
-    };
     const DaysOptions = [
         { id: 1, label: "Today" },
         { id: 2, label: "Yesterday" },
@@ -69,70 +75,141 @@ const DoctorReportForms = () => {
         }
         setSelectedDateRange(`${minDate.toLocaleDateString()} - ${maxDate.toLocaleDateString()}`);
     };
+
+    const onChangeSingleSelection = (selected) => {
+        setSingleSelections(selected);
+    };
+
+    const handleShowDetailsChange = (event) => {
+        setShowDetails({
+            ...showDetails,
+            [event.target.name]: event.target.checked,
+        });
+    };
+
+    const handleSave = () => {
+        const tableRow = {
+            dateRange: selectedDateRange,
+            doctor: singleSelections.length > 0 ? singleSelections[0].label : "",
+            showGroupTests: showDetails.showGroupTests,
+            showPayment: showDetails.showPayment,
+        };
+
+        setTableData([tableRow]);
+    };
+
+    const handleDownloadPDF = () => {
+        const input = tableRef.current;
+
+        html2canvas(input).then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("p", "mm", "a4");
+            const width = pdf.internal.pageSize.getWidth();
+            const height = pdf.internal.pageSize.getHeight();
+            pdf.addImage(imgData, "JPEG", 0, 0, width, height);
+            pdf.save("contractor_report.pdf");
+        });
+    };
+
     return (
         <>
-       <PageTitle
+            <PageTitle
                 breadCrumbItems={[
-
-                    { label: "Accounting", path: "/components/accounting-report", active: true },
-
+                    { label: "Contractor Reports", path: "/components/accounting-report", active: true },
                 ]}
-                title={"Contractor Reports"}
+                title={"Accounting"}
             />
-        <Card >
-                <h4 class="px-2 bg-primary text-light p-2">Contractor Reports</h4>
-            <Card.Body>
-            <Row>
-                <Col>
-                    <p className="mb-1 fw-bold">Date range:
-                    </p>
-                    <Typeahead
-                        id="select2"
-                        labelKey={"label"}
-                        multiple={false}
-                        options={DaysOptions}
-                        placeholder="Choose a date range..."
-                        selected={[{ label: selectedDateRange }]} // Display selected date range in the input field
-                        onChange={(selected) => {
-                            if (selected.length > 0) {
-                                handleOptionClick(selected[0].label);
-                            }
-                        }}
-                    />
-                </Col>
-                <Col>
-                    <p className="mb-1 fw-bold">Doctor:</p>
-                    <Typeahead
-                        id="select2"
-                        labelKey={"label"}
-                        multiple={false}
-                        onChange={onChangeSingleSelection}
-                        options={options}
-                        placeholder="Choose a state..."
-                        selected={singleSelections}
-                    />
-                </Col>
-                <Col>
-                    <p className="mb-1 fw-bold">
-                        Show Details</p>
-                    <Form.Check
-                        type="checkbox"
-                        id="autoSizingCheck"
-                        label="Show Group tests"
-                    />
-                    <Form.Check
-                        type="checkbox"
-                        id="autoSizingCheck"
-                        label="Show Payment"
-                    />
-                </Col>
-                <Col>
-                <Button class="primary width-xs align-center"><i class="bi bi-gear-fill p-2"></i><span>Save</span></Button>
-                </Col>
-            </Row>
-            </Card.Body>
-        </Card> </>
+            <Card>
+                <h4 className="px-2 bg-primary text-light p-2">Contractor Reports</h4>
+                <Card.Body>
+                    <Row>
+                        <Col>
+                            <p className="mb-1 fw-bold">Date range:</p>
+                            <Typeahead
+                                id="select2"
+                                labelKey="label"
+                                multiple={false}
+                                options={DaysOptions}
+                                placeholder="Choose a date range..."
+                                selected={[{ label: selectedDateRange }]}
+                                onChange={(selected) => {
+                                    if (selected.length > 0) {
+                                        handleOptionClick(selected[0].label);
+                                    }
+                                }}
+                            />
+                        </Col>
+                        <Col>
+                            <p className="mb-1 fw-bold">Doctor:</p>
+                            <Typeahead
+                                id="select2"
+                                labelKey="label"
+                                multiple={false}
+                                onChange={onChangeSingleSelection}
+                                options={options}
+                                placeholder="Choose a doctor..."
+                                selected={singleSelections}
+                            />
+                        </Col>
+                        <Col>
+                            <p className="mb-1 fw-bold">Show Details</p>
+                            <Form.Check
+                                type="checkbox"
+                                id="showGroupTests"
+                                name="showGroupTests"
+                                label="Show Group tests"
+                                onChange={handleShowDetailsChange}
+                            />
+                            <Form.Check
+                                type="checkbox"
+                                id="showPayment"
+                                name="showPayment"
+                                label="Show Payment"
+                                onChange={handleShowDetailsChange}
+                            />
+                        </Col>
+                        <Col>
+                            <Button className="primary width-xs align-center" onClick={handleSave}>
+                                <i className="bi bi-gear-fill p-2"></i>
+                                <span>Save</span>
+                            </Button>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+            {tableData.length > 0 && (
+                <Card className="mt-3">
+                    <Card.Body>
+                        <Card.Title as="h5" className="mb-4">Accounting Report</Card.Title>
+                        <Table striped bordered hover responsive="sm" variant="dark">
+                            <thead>
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Doctor</th>
+                                    <th>Show Group Tests</th>
+                                    <th>Show Payment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tableData.map((row, index) => (
+                                    <tr key={index}>
+                                        <td>{row.dateRange}</td>
+                                        <td>{row.doctor}</td>
+                                        <td>{row.showGroupTests ? "Yes" : "No"}</td>
+                                        <td>{row.showPayment ? "Yes" : "No"}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                        <Button className="primary width-xs align-center" onClick={handleDownloadPDF}>
+                            <i className="bi bi-download p-2"></i>
+                            <span>Download as PDF</span>
+                        </Button>
+                    </Card.Body>
+                </Card>
+            )}
+        </>
     );
 };
 
-export default DoctorReportForms;
+export default ContractorReportForms;

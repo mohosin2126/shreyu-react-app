@@ -1,13 +1,8 @@
-import React, { useState } from "react";
-import { Button, ButtonGroup, Card, Col, Form, Modal, Row } from "react-bootstrap";
-import Table from "../../Table";
-import { records as data } from "./data";
+import { useState } from "react";
+import { Button, ButtonGroup, Card, Col, Form,  Modal, Row } from "react-bootstrap";
 import PageTitle from "../../PageTitle";
-import SimpleMDEReact from "react-simplemde-editor";
-import "easymde/dist/easymde.min.css";
-import Category from "./Category";
-import DatePick from "./Date";
-import Doctor from "./Doctor";
+import Table from "../../Table";
+import { records as data } from "./incomedata";
 
 const columns = [
     {
@@ -18,16 +13,6 @@ const columns = [
     {
         Header: "Category",
         accessor: "category",
-        sort: true,
-    },
-    {
-        Header: "Date",
-        accessor: "date",
-        sort: true,
-    },
-    {
-        Header: "Amount",
-        accessor: "amount",
         sort: true,
     },
     {
@@ -49,7 +34,7 @@ const sizePerPageList = [
     { text: "All", value: data.length },
 ];
 
-const ExpensesTable = () => {
+const IncomeCategoryTable = () => {
     const [showScrollableModal, setShowScrollableModal] = useState(false);
     const [validated, setValidated] = useState(false);
 
@@ -66,17 +51,17 @@ const ExpensesTable = () => {
         <>
             <PageTitle
                 breadCrumbItems={[
-                    { label: "Expenses", path: "/components/accounting-expense", active: true },
+                    { label: "Income Categories", path: "/components/accounting-expense-category", active: true },
                 ]}
-                title={"Expenses"}
+                title={"Incomes"}
             />
             <Row>
                 <Col>
                     <Card>
                         <Card.Body>
-                            <Row>
+                            <Row className="border">
                                 <Col xs={12} md={4}>
-                                    <h4 className="header-title">Expenses</h4>
+                                    <h4 className="header-title">Income Categories Table</h4>
                                 </Col>
                                 <Col xs={12} md={6} className="align-center">
                                     <ButtonGroup className="mb-2">
@@ -89,66 +74,38 @@ const ExpensesTable = () => {
                                     </ButtonGroup>
                                 </Col>
                                 <Col xs={12} md={2}>
-                                    <Button onClick={() => setShowScrollableModal(true)} className="primary">
+                                    <Button onClick={() => setShowScrollableModal(true)} className="primary ">
                                         <i className="bi bi-plus-lg p-2"></i>
                                         <span>Create</span>
                                     </Button>
                                     <Modal show={showScrollableModal} onHide={() => setShowScrollableModal(false)} scrollable>
-                                        <Modal.Header closeButton>
-                                            <Modal.Title>Add Expense Category</Modal.Title>
-                                        </Modal.Header>
-                                        <Modal.Body>
-    <Form onSubmit={handleSubmit}>
-        <h4>Create Expenses</h4>
-        <div className="container">
-            <div className="row">
-                <div className="row">
-                    <Card.Body>
-                        <Form.Group controlId="category">
-                            <Form.Label className="mb-1 fw-bold">Category</Form.Label>
-                            <Category />
-                        </Form.Group>
-                    </Card.Body>
-                </div>
-                <div className="row">
-                    <Card.Body>
-                        <Form.Group controlId="date">
-                            {/* <Form.Label className="mb-1 fw-bold">Date</Form.Label> */}
-                            <DatePick />
-                        </Form.Group>
-                    </Card.Body>
-                </div>
-                <div className="row">
-                    <Card.Body>
-                        <Form.Group controlId="doctor">
-                            <Form.Label className="mb-1 fw-bold">Doctor</Form.Label>
-                            <Doctor />
-                        </Form.Group>
-                    </Card.Body>
-                </div>
-                <div className="row">
-                    <Card.Body>
-                        <Form.Group controlId="amount">
-                            <Form.Label className="mb-1 fw-bold">Amount</Form.Label>
-                            <Form.Control id="example-number" type="number" name="number" />
-                        </Form.Group>
-                    </Card.Body>
-                </div>
-            </div>
-        </div>
-        <h4 className="header-title mt-0 mb-1">Notes</h4>
-        <SimpleMDEReact id="1" options={{ autofocus: true }} />
-        <Button type="submit" className="primary width-xs"><i className="bi bi-check-lg p-2"></i><span>Save</span></Button>
-    </Form>
-</Modal.Body>
+    <Modal.Header closeButton>
+        <Modal.Title as="h5">Add Income Category</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Form className='addExpenseCategoryForm' noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="validationCategory">
+                <Form.Label>Category</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Income Category Name"
+                    required
+                />
+                <Form.Control.Feedback type="invalid">
+                    Please provide an Income category name.
+                </Form.Control.Feedback>
+            </Form.Group>
+            <Button type="submit">Submit</Button>
+        </Form>
+    </Modal.Body>
+</Modal>
 
-                                    </Modal>
                                 </Col>
                             </Row>
                             <Table
                                 columns={columns}
                                 data={data}
-                                pageSize={13}
+                                pageSize={5}
                                 sizePerPageList={sizePerPageList}
                                 isSortable={true}
                                 pagination={true}
@@ -162,4 +119,4 @@ const ExpensesTable = () => {
     );
 };
 
-export default ExpensesTable;
+export default IncomeCategoryTable;

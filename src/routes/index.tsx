@@ -3,7 +3,7 @@ import { Navigate, Route, RouteProps } from "react-router-dom";
 
 // components
 import PrivateRoute from "./PrivateRoute";
-import IncomeCategories from "../components/IncomeCategories/IncomeCategories";
+import IncomeCategories from "../components/Accounting/IncomeCategories/IncomeCategories";
 import Income from "../components/Accounting/Income/Income";
 import ContractorReports from "../components/Accounting/ContractorReports/ContractorReports";
 import Summary from "../components/Accounting/Summary/Summary";
@@ -95,8 +95,9 @@ const ExpenseCategory = React.lazy(() => import("../../src/components/Accounting
 const CreateExpenseCategory = React.lazy(() => import("../../src/components/Accounting/ExpenseCategories/CreateExpenseCategory"));
 const Expenses = React.lazy(() => import("../../src/components/Accounting/Expenses/ExpensesTable"));
 const AccountingReportForms = React.lazy(() => import("../../src/components/Accounting/AccountingReport/AccountingReport"));
-const CreateExpense = React.lazy(() => import("../../src/components/Accounting/Expenses/CreateExpenses"));
+
 const DoctorExpense = React.lazy(() => import("../../src/components/Accounting/DoctorReport/DoctorReportForms"));
+const ContractorExpense = React.lazy(() => import("../../src/components/Accounting/ContractorReports/ContractorReports"));
 
 export interface RoutesProps {
   path: RouteProps["path"];
@@ -313,12 +314,7 @@ const uiRoutes: RoutesProps = {
       element: <Expenses />,
       route: PrivateRoute,
     },
-    {
-      path: "/components/accounting-create-expenses",
-      name: "CreateExpenses",
-      element: <CreateExpense />,
-      route: PrivateRoute,
-    },
+   
     {
       path: "/components/accounting-report",
       name: "AccountingReport",

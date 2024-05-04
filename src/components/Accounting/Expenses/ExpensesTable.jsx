@@ -98,44 +98,50 @@ const ExpensesTable = () => {
                                             <Modal.Title>Add Expense Category</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
-                                            <div>
-                                                <h4>Create Expenses</h4>
-                                                <div className="container">
-                                                    <div className="row">
-                                                        <div className="row">
-                                                            <Card.Body>
-                                                                <p className="mb-1 fw-bold">Category</p>
-                                                                <Category />
-                                                            </Card.Body>
-                                                        </div>
-                                                        <div className="row">
-                                                            <Card.Body>
-                                                                <DatePick />
-                                                            </Card.Body>
-                                                        </div>
-                                                        <div className="col">
-                                                            <Card.Body>
-                                                                <p className="mb-1 fw-bold">Doctor</p>
-                                                                <Doctor />
-                                                            </Card.Body>
-                                                        </div>
-                                                        <div className="col">
-                                                            <Card.Body>
-                                                                <p className="mb-1 fw-bold">Amount</p>
-                                                                <Form.Group as={Row}>
-                                                                    <Col lg={10}>
-                                                                        <Form.Control id="example-number" type="number" name="number" />
-                                                                    </Col>
-                                                                </Form.Group>
-                                                            </Card.Body>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <h4 className="header-title mt-0 mb-1">Notes</h4>
-                                                <SimpleMDEReact id="1" options={{ autofocus: true }} />
-                                                <Button className="primary width-xs"><i className="bi bi-check-lg p-2"></i><span>Save</span></Button>
-                                            </div>
-                                        </Modal.Body>
+    <Form onSubmit={handleSubmit}>
+        <h4>Create Expenses</h4>
+        <div className="container">
+            <div className="row">
+                <div className="row">
+                    <Card.Body>
+                        <Form.Group controlId="category">
+                            <Form.Label className="mb-1 fw-bold">Category</Form.Label>
+                            <Category />
+                        </Form.Group>
+                    </Card.Body>
+                </div>
+                <div className="row">
+                    <Card.Body>
+                        <Form.Group controlId="date">
+                            <Form.Label className="mb-1 fw-bold">Date</Form.Label>
+                            <DatePick />
+                        </Form.Group>
+                    </Card.Body>
+                </div>
+                <div className="col">
+                    <Card.Body>
+                        <Form.Group controlId="doctor">
+                            <Form.Label className="mb-1 fw-bold">Doctor</Form.Label>
+                            <Doctor />
+                        </Form.Group>
+                    </Card.Body>
+                </div>
+                <div className="col">
+                    <Card.Body>
+                        <Form.Group controlId="amount">
+                            <Form.Label className="mb-1 fw-bold">Amount</Form.Label>
+                            <Form.Control id="example-number" type="number" name="number" />
+                        </Form.Group>
+                    </Card.Body>
+                </div>
+            </div>
+        </div>
+        <h4 className="header-title mt-0 mb-1">Notes</h4>
+        <SimpleMDEReact id="1" options={{ autofocus: true }} />
+        <Button type="submit" className="primary width-xs"><i className="bi bi-check-lg p-2"></i><span>Save</span></Button>
+    </Form>
+</Modal.Body>
+
                                     </Modal>
                                 </Col>
                             </Row>
